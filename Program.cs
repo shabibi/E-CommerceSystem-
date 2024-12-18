@@ -24,6 +24,10 @@ namespace E_CommerceSystem
             builder.Services.AddScoped<IProductRepo, ProductRepo>();
             builder.Services.AddScoped<IProductService, ProductService>();
 
+
+
+            builder.Services.AddScoped<IOrderRepo, OrderRepo>();
+            builder.Services.AddScoped<IOrderService, OrderService>();
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                  options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 

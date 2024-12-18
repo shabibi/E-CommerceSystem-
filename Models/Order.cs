@@ -13,7 +13,7 @@ namespace E_CommerceSystem.Models
 
         public decimal TotalAmount { get; set; }
 
-        [ForeignKey("User")]
+        [ForeignKey("user")]
         public int UID { get; set; }
         public User user { get; set; }
 
