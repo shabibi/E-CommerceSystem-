@@ -99,7 +99,7 @@ namespace E_CommerceSystem.Controllers
             var claims = new[]
             {
                 new Claim(JwtRegisteredClaimNames.Sub, userId),
-                new Claim(JwtRegisteredClaimNames.UniqueName, username),
+                new Claim(JwtRegisteredClaimNames.Name, username),
                 new Claim(JwtRegisteredClaimNames.UniqueName, role),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
 
