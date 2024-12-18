@@ -18,7 +18,11 @@ namespace E_CommerceSystem
 
             // Add services to the container.
             builder.Services.AddScoped<IUserRepo,UserRepo>();
-            builder.Services.AddScoped<IUserService,UserService>(); 
+            builder.Services.AddScoped<IUserService,UserService>();
+
+
+            builder.Services.AddScoped<IProductRepo, ProductRepo>();
+            builder.Services.AddScoped<IProductService, ProductService>();
 
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                  options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
