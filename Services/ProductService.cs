@@ -45,7 +45,7 @@ namespace E_CommerceSystem.Services
             return pagedProducts;
         
     }
-    public Product GetProductById(int pid)
+         public Product GetProductById(int pid)
         {
             var product = _productRepo.GetProductById(pid);
             if (product == null)
@@ -68,6 +68,12 @@ namespace E_CommerceSystem.Services
             _productRepo.UpdateProduct(product);
         }
 
-
+        public Product GetProductByNmae(string productName)
+        {
+            var product = _productRepo.GetProductByNmae(productName);
+            if (product == null)
+                throw new KeyNotFoundException($"Product with Nmae {productName} not found.");
+            return product;
+        }
     }
 }

@@ -8,5 +8,6 @@ namespace E_CommerceSystem.Repositories
         IEnumerable<Product> GetAllProducts();
         Product GetProductById(int pid);
         void UpdateProduct(Product product);
+        Product GetProductByNmae(string productName);
     }
 }

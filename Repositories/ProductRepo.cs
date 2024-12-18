@@ -1,4 +1,5 @@
 ﻿using E_CommerceSystem.Models;
+using System.Security.Cryptography;
 
 namespace E_CommerceSystem.Repositories
 {
@@ -60,5 +61,17 @@ namespace E_CommerceSystem.Repositories
             }
         }
 
+        public Product GetProductByNmae( string productName)
+        {
+            try
+            {
+                return _context.Products.FirstOrDefault(p => p.ProductName == productName);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Database error: {ex.Message}");
+            }
+           
+        }
     }
 }
