@@ -49,7 +49,7 @@ namespace E_CommerceSystem.Controllers
             }
 
         }
-        [HttpGet]
+        [HttpGet("GetAllOrders")]
         public IActionResult GetAllOrders()
         {
             try
@@ -64,6 +64,30 @@ namespace E_CommerceSystem.Controllers
                 int uid = int.Parse(userId);
                 
                 return Ok(_orderService.GetAllOrders(uid));
+            }
+            catch (Exception ex)
+            {
+                // Return a generic error response
+                return StatusCode(500, $"An error occurred while retrieving products. {(ex.Message)}");
+
+            }
+        }
+
+        [HttpGet("GetOrderById/{OrderId}")]
+        public IActionResult GetOrderById(int OrderId)
+        {
+            try
+            {
+                // Retrieve the Authorization header from the request
+                var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+
+                // Decode the token to check user role
+                var userId = GetUserIdFromToken(token);
+
+                // Extract user ID 
+                int uid = int.Parse(userId);
+
+                return Ok(_orderService.GetOrderById(OrderId,uid));
             }
             catch (Exception ex)
             {

@@ -21,6 +21,7 @@ namespace E_CommerceSystem.Services
             _orderProductsService = orderProductsService;
         }
 
+        //get all orders for login user
         public List <OrderProducts> GetAllOrders(int uid)
         {
             var orders = _orderRepo.GetOrderByUserId(uid);
@@ -39,6 +40,47 @@ namespace E_CommerceSystem.Services
 
             return allOrderProducts;
 
+        }
+
+        //get order by order id for the login user
+        public IEnumerable<OrdersOutputOTD> GetOrderById(int oid, int uid)
+        {
+            //list of items in the order 
+            List<OrdersOutputOTD> items = new List<OrdersOutputOTD>();
+            OrdersOutputOTD ordersOutputOTD = null;
+
+            
+            List<OrderProducts> products = null;
+            Product product = null;
+            string productName = string.Empty;
+
+            //get order 
+            var order = _orderRepo.GetOrderById(oid);
+
+            if (order == null)
+                throw new InvalidOperationException($"No orders found .");
+
+            //execute the products data in existing Product
+            if (order.UID == uid)
+            {
+                products = _orderProductsService.GetOrdersByOrderId(oid);
+                foreach (var p in products)
+                {
+                    product = _productService.GetProductById(p.PID);
+                    productName = product.ProductName;
+                    ordersOutputOTD = new OrdersOutputOTD
+                    {
+                        ProductName = productName,
+                        Quantity = p.Quantity,
+                        OrderDate = order.OrderDate,
+                        TotalAmount = p.Quantity * product.Price,
+                    };
+                    items.Add(ordersOutputOTD);
+                }
+            }
+   
+            return items;
+     
         }
 
         public IEnumerable<Order> GetOrderByUserId(int uid)
