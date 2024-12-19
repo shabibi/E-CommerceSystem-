@@ -1,6 +1,8 @@
 ﻿using E_CommerceSystem.Models;
 using E_CommerceSystem.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Numerics;
 using System.Security.Cryptography;
 
 namespace E_CommerceSystem.Services
@@ -9,11 +11,13 @@ namespace E_CommerceSystem.Services
     {
         private readonly IOrderRepo _orderRepo;
         private readonly IProductService _productService;
+        private readonly IOrderProductsService _orderProductsService;
 
-        public OrderService(IOrderRepo orderRepo, IProductService productService)
+        public OrderService(IOrderRepo orderRepo, IProductService productService, IOrderProductsService orderProductsService)
         {
             _orderRepo = orderRepo;
             _productService = productService;
+            _orderProductsService = orderProductsService;
         }
 
         public IEnumerable<Order> GetAllOrders()
@@ -51,12 +55,18 @@ namespace E_CommerceSystem.Services
         {
             _orderRepo.UpdateOrder(order);
         }
+
+        //Places an order for the given list of items and user ID.
         public void PlaceOrder( List<OrderItemDTO> items, int uid)
         {
-           
+            // Temporary variable to hold the currently processed product
             Product existingProduct = null;
-            decimal TotalPrice, totalOrderPrice = 0 ;
+            
+            decimal TotalPrice, totalOrderPrice = 0; // Variables to hold the total price of each item and the overall order
 
+            OrderProducts orderProducts = null;
+
+            // Validate all items in the order
             for (int i = 0; i < items.Count; i++)
             {
                 TotalPrice = 0;
@@ -68,17 +78,37 @@ namespace E_CommerceSystem.Services
                     throw new Exception($"{items[i].ProductName} is out of stock");
 
             }
+            // Create a new order for the user
+            var order = new Order { UID = uid, OrderDate = DateTime.Now, TotalAmount = 0 };
+            AddOrder(order); // Save the order to the database
+
+            // Process each item in the order
             foreach (var item in items)
             {
+                // Retrieve the product by its name
                 existingProduct = _productService.GetProductByName(item.ProductName);
+               
+                // Calculate the total price for the current item
                 TotalPrice = item.Quantity * existingProduct.Price;
+
+                // Deduct the ordered quantity from the product's stock
                 existingProduct.Stock -= item.Quantity;
-                
+
+                // Update the overall total order price
                 totalOrderPrice += TotalPrice;
+
+                // Create a relationship record between the order and product
+                orderProducts = new OrderProducts {OID = order.OID, PID = existingProduct.PID, Quantity = item.Quantity  };
+                _orderProductsService.AddOrderProducts(orderProducts);
+
+                // Update the product's stock in the database
                 _productService.UpdateProduct(existingProduct);
             }
-            var order = new Order { TotalAmount = totalOrderPrice, OrderDate = DateTime.Now, UID = uid };
-            AddOrder(order);
+
+            // Update the total amount of the order
+            order.TotalAmount = totalOrderPrice;
+            UpdateOrder(order);
+
         }
     }
 }
