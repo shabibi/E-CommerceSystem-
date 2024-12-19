@@ -21,46 +21,24 @@ namespace E_CommerceSystem.Services
             _orderProductsService = orderProductsService;
         }
 
-        public IEnumerable<OrdersOutputOTD> GetAllOrders(int uid)
+        public List <OrderProducts> GetAllOrders(int uid)
         {
-            List <OrdersOutputOTD> items = new List <OrdersOutputOTD> ();   
-            OrdersOutputOTD ordersOutputOTD = null;
+            var orders = _orderRepo.GetOrderByUserId(uid);
+            if (orders == null || !orders.Any())
+                throw new InvalidOperationException($"No orders found for user ID {uid}.");
 
-            List< OrderProducts> products = null;
-            Product product = null;
-            string productName = string.Empty;
-
-            var orders = GetOrderByUserId (uid);
+            // Collect all OrderProducts for all orders
+            var allOrderProducts = new List<OrderProducts>();
 
             foreach (var order in orders)
             {
-                products = _orderProductsService.GetOrdersByOrderId(order.OID);
-                foreach(var p in products)
-                {
-                    product = _productService.GetProductById(p.PID);
-                    productName = product.ProductName;
-                    ordersOutputOTD = new OrdersOutputOTD
-                    {
-                        ProductName = productName,
-                        Quantity = p.Quantity,
-                        OrderDate = order.OrderDate,
-                        TotalAmount = p.Quantity * product.Price,
-                    };
-                    items.Add(ordersOutputOTD);
-                }
+                var orderProducts = _orderProductsService.GetOrdersByOrderId(order.OID);
+                if (orderProducts != null)
+                    allOrderProducts.AddRange(orderProducts);
             }
-         
-            return items;
-        }
-         
 
-        public Order GetOrderById(int oid)
-        {
-            var order = _orderRepo.GetOrderById(oid);
-            if (order == null)
-                throw new KeyNotFoundException($"order with ID {oid} not found.");
+            return allOrderProducts;
 
-            return order;
         }
 
         public IEnumerable<Order> GetOrderByUserId(int uid)

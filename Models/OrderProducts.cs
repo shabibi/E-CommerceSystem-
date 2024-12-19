@@ -12,14 +12,17 @@ namespace E_CommerceSystem.Models
         [Range (0, int.MaxValue)]
         public int Quantity { get; set; }
 
-        [JsonIgnore]
+        
         [ForeignKey("Order")]
+
         public int OID { get; set; }
+        [JsonIgnore]
         public Order Order { get; set; }
 
-        [JsonIgnore]
+        
         [ForeignKey("Product")]
         public int PID { get; set; }
+        [JsonIgnore]
         public Product product { get; set; }
     }
 }
