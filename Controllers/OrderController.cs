@@ -49,7 +49,31 @@ namespace E_CommerceSystem.Controllers
             }
 
         }
+        [HttpGet]
+        public IActionResult GetAllOrders()
+        {
+            try
+            {
+                // Retrieve the Authorization header from the request
+                var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
 
+                // Decode the token to check user role
+                var userId = GetUserIdFromToken(token);
+
+                // Extract user ID 
+                int uid = int.Parse(userId);
+                
+                return Ok(_orderService.GetAllOrders(uid));
+            }
+            catch (Exception ex)
+            {
+                // Return a generic error response
+                return StatusCode(500, $"An error occurred while retrieving products. {(ex.Message)}");
+
+            }
+        }
+
+        // Method to decode token to get user id
         private string? GetUserIdFromToken(string token)
         {
             var handler = new JwtSecurityTokenHandler();
@@ -68,4 +92,6 @@ namespace E_CommerceSystem.Controllers
             throw new UnauthorizedAccessException("Invalid or unreadable token.");
         }
     }
+
+
 }

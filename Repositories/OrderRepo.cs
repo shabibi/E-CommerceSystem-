@@ -35,6 +35,18 @@ namespace E_CommerceSystem.Repositories
             }
         }
 
+        public IEnumerable<Order> GetOrderByUserId(int uid)
+        {
+            try
+            {
+                return _context.Orders.Where(o => o.UID == uid).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Database error: {ex.Message}");
+            }
+        }
+
         public void AddOrder(Order order)
         {
             try

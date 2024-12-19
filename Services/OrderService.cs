@@ -1,6 +1,7 @@
 ﻿using E_CommerceSystem.Models;
 using E_CommerceSystem.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Security.Cryptography;
@@ -20,20 +21,53 @@ namespace E_CommerceSystem.Services
             _orderProductsService = orderProductsService;
         }
 
-        public IEnumerable<Order> GetAllOrders()
+        public IEnumerable<OrdersOutputOTD> GetAllOrders(int uid)
         {
-            var orders = _orderRepo.GetAllOrders();
-            if (orders == null)
-                throw new KeyNotFoundException($"order List is empty.");
+            List <OrdersOutputOTD> items = new List <OrdersOutputOTD> ();   
+            OrdersOutputOTD ordersOutputOTD = null;
 
-            return orders;
+            List< OrderProducts> products = null;
+            Product product = null;
+            string productName = string.Empty;
+
+            var orders = GetOrderByUserId (uid);
+
+            foreach (var order in orders)
+            {
+                products = _orderProductsService.GetOrdersByOrderId(order.OID);
+                foreach(var p in products)
+                {
+                    product = _productService.GetProductById(p.PID);
+                    productName = product.ProductName;
+                    ordersOutputOTD = new OrdersOutputOTD
+                    {
+                        ProductName = productName,
+                        Quantity = p.Quantity,
+                        OrderDate = order.OrderDate,
+                        TotalAmount = p.Quantity * product.Price,
+                    };
+                    items.Add(ordersOutputOTD);
+                }
+            }
+         
+            return items;
         }
+         
 
         public Order GetOrderById(int oid)
         {
             var order = _orderRepo.GetOrderById(oid);
             if (order == null)
                 throw new KeyNotFoundException($"order with ID {oid} not found.");
+
+            return order;
+        }
+
+        public IEnumerable<Order> GetOrderByUserId(int uid)
+        {
+            var order = _orderRepo.GetOrderByUserId(uid);
+            if (order == null)
+                throw new KeyNotFoundException($"order with user ID {uid} not found.");
 
             return order;
         }
