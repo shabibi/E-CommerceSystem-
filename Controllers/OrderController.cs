@@ -32,16 +32,11 @@ namespace E_CommerceSystem.Controllers
                 var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
 
                 // Decode the token to check user role
-                var userRole = GetUserRoleFromToken(token);
+                var userId= GetUserIdFromToken(token);
 
                 // Extract user ID 
-                int uid = int.Parse(userRole.Sub);
+                int uid = int.Parse(userId);
 
-                // Only allow user to place order
-                if (userRole.UniqueName != "user")
-                {
-                    return BadRequest("You are not authorized to perform this action.");
-                }
                 _orderService.PlaceOrder(items, uid);
 
                 return Ok("Order placed successfully.");
@@ -55,7 +50,7 @@ namespace E_CommerceSystem.Controllers
 
         }
 
-        private (string? Sub, string? UniqueName) GetUserRoleFromToken(string token)
+        private string? GetUserIdFromToken(string token)
         {
             var handler = new JwtSecurityTokenHandler();
 
@@ -66,10 +61,8 @@ namespace E_CommerceSystem.Controllers
                 // Extract the 'sub' claim
                 var subClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "sub");
 
-                // Extract the 'unique_name' claim
-                var uniqueNameClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "unique_name");
 
-                return (subClaim?.Value, uniqueNameClaim?.Value); // Return both values as a tuple
+                return (subClaim?.Value); // Return both values as a tuple
             }
 
             throw new UnauthorizedAccessException("Invalid or unreadable token.");
